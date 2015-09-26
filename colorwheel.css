@@ -1,0 +1,17 @@
+.colorwheel-outer, .colorwheel-inner, canvas {
+    position: absolute;
+}
+
+.colorwheel-outer {
+    border: 2px solid black;
+    border-radius: 100%;
+    z-index:5;
+}
+
+.colorwheel-inner {
+    border: 1px solid black;
+    border-radius: 100%;
+    width: 10px;
+    height: 10px;
+    z-index:5;
+}
