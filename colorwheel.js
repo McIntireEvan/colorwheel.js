@@ -97,7 +97,6 @@ class ColorWheel {
     renderInner() {
         this.ctx.lineWidth = 1;
         this.ctx.strokeRect(this.x - this.half + 2, this.y - this.half + 2, this.length - 2, this.length - 2);
-        console.log(this.x - this.half);
         for (var j = 0; j < 5; j++) {
             for (var i = 0; i < 100; i++) {
                 var line = this.ctx.createLinearGradient(
