@@ -102,13 +102,13 @@ class ColorWheel {
                 var line = this.ctx.createLinearGradient(
                     this.x - this.half + 2,
                     (this.y - this.half) + 2 + ((i * (this.length - 3)) / 100),
-                    this.length - 2,
-                    1 + (this.length - 2) / 100
+                    (this.x + this.half),
+                    (this.y - this.half) + 2 + ((i * (this.length - 3)) / 100) + 3
                 )
-                var sat = 100 - i
-                line.addColorStop(0, 'hsl(' + this.color + ',' + 100 + '%,' + sat + '%)');
-                line.addColorStop(.5, 'hsl(' + this.color + ',' + 50 + '%,' + sat + '%)');
-                line.addColorStop(1, 'hsl(' + this.color + ',' + 0 + '%,' + sat + '%)');
+                var sat = 50 - (i / 2)
+                line.addColorStop(0, 'hsl(' + this.color + ',' + 0 + '%,' + (100 - i) + '%)');
+                line.addColorStop(.5, 'hsl(' + this.color + ',' + 100 + '%,' + sat + '%)');
+                line.addColorStop(1, 'hsl(' + this.color + ',' + 100 + '%,' + sat + '%)');
                 this.ctx.fillStyle = line;
                 this.ctx.fillRect(
                     this.x - this.half + 2,
