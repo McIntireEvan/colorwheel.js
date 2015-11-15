@@ -37,7 +37,7 @@ class ColorWheel {
         this.renderInner();
         
         var _this = this;
-        $(document).on('mousedown', function (evt) {
+        $(this.holder).on('mousedown', function (evt) {
             evt.preventDefault();
             var offset = _this.getRelativePos(_this.can, evt);
             var dist = Math.sqrt(Math.pow(_this.x - offset.x, 2) + Math.pow(_this.y - offset.y, 2));
