@@ -61,12 +61,57 @@ class ColorWheel {
         $('body').append(this.holder);
     }
 
-    getColor() {
+    getRGB() {
         var x = this.inner.offset().left - this.can.offset().left + 5;
         var y = this.inner.offset().top - this.can.offset().top + 5;
 
         var c = this.ctx.getImageData(x, y, 1, 1).data;
         return { 'r': c[0], 'g': c[1], 'b': c[2] };
+    }
+
+    toHex(value) {
+        var hex = value.toString(16);
+        return hex.length == 1 ? '0' + hex : hex;
+    }
+
+    getHex() {
+        var rgb = this.getRGB();
+        return this.toHex(rgb.r) + this.toHex(rgb.g) + this.toHex(rgb.b);
+    }
+
+    getHSL() {
+        var H,S,L;
+
+        var rgb = this.getRGB();
+
+        var r = rgb.r / 255;
+        var g = rgb.g / 255;
+        var b = rgb.b / 255;
+
+        var cMax = Math.max(r, g, b);
+        var cMin = Math.min(r, g, b);
+
+        var dC = cMax - cMin;
+
+        L = (cMax + cMin) / 2;
+
+        if(cMax == cMin) {
+            S = 0;
+        } else {
+            S = L < .5 ? (cMax - cMin)/(cMax + cMin) : (cMax - cMin)/(2 - cMax - cMin);
+        }
+
+        switch(cMax){
+            case r: H = (g-b) / dC; break;
+            case g: H = 2 + (b-r)/ dC; break;
+            case b: H = 4 + (r - g) / dC; break;
+        }
+
+        return {
+            'h': Math.round(H * 60),
+            's': Math.round(S * 100),
+            'l': Math.round(L * 100)
+        };
     }
 
     setColor(angle) {
