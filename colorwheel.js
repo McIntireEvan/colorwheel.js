@@ -156,9 +156,6 @@ class ColorWheel {
                 left: this.can.position().left + offset.x - 5,
                 top: this.can.position().top + offset.y - 5
             });
-            $('body').css(
-            'background', '#' + this.getHex()
-        );
         }
     }
 
@@ -170,10 +167,6 @@ class ColorWheel {
         }
         this.setHue(rawAngle);
         this.color = Math.round(angle);
-
-        $('body').css(
-            'background', '#' + this.getHex()
-        );
         this.renderInner();
     }
 
