@@ -109,10 +109,6 @@ class ColorWheel {
     }
 
     renderInner() {
-        this.fillStyle = "#CFCFCF";
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(this.x - this.half + 2, this.y - this.half + 2, this.length - 2, this.length - 2);
-
         for(var i = 0; i < 100; i++) {
             var line = this.ctx.createLinearGradient(
                 this.x - this.half,
@@ -129,7 +125,7 @@ class ColorWheel {
             }
 
                 this.ctx.fillStyle = line;
-                if(i < 97) {
+                if(i < 99) {
                     this.ctx.fillRect(
                         this.x - this.half + 2,
                         (this.y - this.half) + 2 + ((i * (this.length)) / 100),
