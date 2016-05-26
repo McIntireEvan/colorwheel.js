@@ -26,8 +26,8 @@ class ColorWheel {
 
         this.setHue(this.color * (Math.PI / 180));
         this.inner.css({
-            left: this.can.position().left + this.x - 5,
-            top: this.can.position().top + this.y - 5
+            left: this.can.position().left + this.x - 2.5,
+            top: this.can.position().top + this.y - 2.5
         });
 
         this.focusOut = false, this.focusIn = false;
@@ -61,8 +61,8 @@ class ColorWheel {
     }
 
     getRGB() {
-        var x = this.inner.offset().left - this.can.offset().left + 5;
-        var y = this.inner.offset().top - this.can.offset().top + 5;
+        var x = this.inner.offset().left - this.can.offset().left + 2.5;
+        var y = this.inner.offset().top - this.can.offset().top + 2.5;
 
         var c = this.ctx.getImageData(x, y, 1, 1).data;
         return { 'r': c[0], 'g': c[1], 'b': c[2] };
@@ -84,10 +84,23 @@ class ColorWheel {
     }
 
     setHue(angle) {
+        this.color = angle * 60;
         var middle = this.radius - ((this.ringsize) / 2);
         this.outer.css({
             left: Math.cos(angle) * middle + this.can.position().left + this.x - (this.ringsize / 2) - 2,
             top: Math.sin(angle) * middle + this.can.position().top + this.y - (this.ringsize / 2) - 2
+        });
+    }
+
+    setColor(r, g, b) {
+        var hsl = ColorConvert.RGBtoHSL(r, g, b);
+        var hsv = ColorConvert.HSLToHSB(hsl.h / 60, hsl.s / 100, hsl.l / 100);
+        this.setHue(hsv.h / 60);
+        this.renderInner();
+        
+        this.inner.css({
+            left: this.x - this.half + ((this.length) * (hsv.s / 100)) - 4,
+            top: this.y + this.half - ((this.length) * (hsv.b / 100))
         });
     }
 
@@ -111,34 +124,28 @@ class ColorWheel {
     renderInner() {
         for(var i = 0; i < 100; i++) {
             var line = this.ctx.createLinearGradient(
-                this.x - this.half,
-                this.y - this.half + (i * (this.length / 100)),
-                this.x + this.half,
+                this.x - this.half - 3,
+                this.y - this.half + (i * (this.length / 100)) ,
+                this.x + this.half - 3,
                 this.y - this.half + (i * (this.length / 100))
             );
 
             var stops = 15;
 
             for(var j = 0; j < stops; j++) {
-                var hsl = ColorConvert.HSBToHSL(this.color / 60, j / stops, (100 - i) / 100);
+                var s = (j == stops - 1 ? 1 : 0) + j;
+                var l = 100 - i - (i == 99 ? 1 : 0) ;
+                var hsl = ColorConvert.HSBToHSL(this.color / 60, s / stops, l / 100);
                 line.addColorStop(j / stops, 'hsl(' + hsl.h + ',' + hsl.s + '%,' + hsl.l + '%)');
             }
 
                 this.ctx.fillStyle = line;
-                if(i < 99) {
                     this.ctx.fillRect(
-                        this.x - this.half + 2,
+                        this.x - this.half - 2,
                         (this.y - this.half) + 2 + ((i * (this.length)) / 100),
-                        this.length - 2,
+                        this.length + 2,
                         (this.length / 100) + 2
                     );
-                } else {
-                    this.ctx.fillRect(
-                        this.x - this.half + 2,
-                        (this.y - this.half) + 2 + ((i * (this.length)) / 100),
-                        this.length - 2,
-                        (this.length / 100))
-                }
         }
     }
 
@@ -149,8 +156,8 @@ class ColorWheel {
         var dist = Math.sqrt(Math.pow(this.x - offset.x, 2) + Math.pow(this.y - offset.y, 2));
         if (dist < this.radius - this.ringsize && xDiff < this.half && yDiff < this.half) {
             this.inner.css({
-                left: this.can.position().left + offset.x - 5,
-                top: this.can.position().top + offset.y - 5
+                left: this.can.position().left + offset.x - 2.5,
+                top: this.can.position().top + offset.y - 2.5
             });
         }
     }
@@ -187,24 +194,18 @@ class ColorConvert {
 
         var dC = cMax - cMin;
 
-        if(dC == 0) {
-            return {
-                'h': 0, 's': 0, 'l': 0
-            };
-        }
-
         L = (cMax + cMin) / 2;
 
         if(cMax == cMin) {
             S = 0;
+            H = 0;
         } else {
             S = L < .5 ? (cMax - cMin)/(cMax + cMin) : (cMax - cMin)/(2 - cMax - cMin);
-        }
-
-        switch(cMax){
-            case r: H = (g-b) / dC; break;
-            case g: H = 2 + (b-r)/ dC; break;
-            case b: H = 4 + (r - g) / dC; break;
+            switch(cMax){
+                case r: H = (g-b) / dC; break;
+                case g: H = 2 + (b-r)/ dC; break;
+                case b: H = 4 + (r - g) / dC; break;
+            }
         }
 
         return {
@@ -243,12 +244,17 @@ class ColorConvert {
         l = .5 * B * (2 - S);
 
         s = (B * S) / (1 - Math.abs(2 * l - 1));
-
-        if(S == 0 && B == 1) {
+        if((S == 0 || isNaN(s)) && B == 1) {
             return {
                 'h': H * 60,
-                's': S * 100,
-                'l': B * 100
+                's': 0,
+                'l': 100
+            };
+        } else if((S == 0 || isNaN(s)) && B == 0) {
+            return {
+                'h': H * 60,
+                's': 0,
+                'l': 0
             };
         }
 
@@ -256,39 +262,6 @@ class ColorConvert {
             'h': Math.round(h * 60),
             's': Math.round(s * 100),
             'l': Math.round(l * 100)
-        };
-    }
-
-    static RGBToHSL(R, G, B) {
-        var H,S,L;
-
-        var r = R / 255;
-        var g = G / 255;
-        var b = B / 255;
-
-        var cMax = Math.max(r, g, b);
-        var cMin = Math.min(r, g, b);
-
-        var dC = cMax - cMin;
-
-        L = (cMax + cMin) / 2;
-
-        if(cMax == cMin) {
-            S = 0;
-        } else {
-            S = L < .5 ? (cMax - cMin)/(cMax + cMin) : (cMax - cMin)/(2 - cMax - cMin);
-        }
-
-        switch(cMax){
-            case r: H = (g-b) / dC; break;
-            case g: H = 2 + (b-r)/ dC; break;
-            case b: H = 4 + (r - g) / dC; break;
-        }
-
-        return {
-            'h': Math.round(H * 60),
-            's': Math.round(S * 100),
-            'l': Math.round(L * 100)
         };
     }
 
