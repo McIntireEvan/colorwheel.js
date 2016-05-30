@@ -1,12 +1,17 @@
 "use strict";
 
 class ColorWheel {
+    /**
+     * Constructs the HSV colorwheel
+     * @param {string} id - The id that will be given to the div holding all the elements
+     * @param {Number} size - The diameter of the colorwheel
+     */
     constructor(id, size) {
         this.radius = size / 2;
         this.ringsize = size / 10;
         this.color = 0;
 
-        this.length = Math.sqrt(2 * Math.pow(this.radius - this.ringsize, 2));
+        this.length = Math.sqrt(2 * Math.pow(this.radius - this.ringsize, 2)); //Size of the inner square
         this.half = this.length / 2;
 
         this.can = $('<canvas>').attr({
@@ -102,6 +107,11 @@ class ColorWheel {
             left: this.x - this.half + ((this.length) * (hsv.s / 100)) - 4,
             top: this.y + this.half - ((this.length) * (hsv.b / 100))
         });
+    }
+    
+    setColorHex(hex) {
+        var rgb = ColorConvert.HexToRGB(hex);
+        this.setColor(rgb.r, rgb.g, rgb.b);
     }
 
     renderOuter() {
@@ -263,6 +273,15 @@ class ColorConvert {
             's': Math.round(s * 100),
             'l': Math.round(l * 100)
         };
+    }
+    
+    static HexToRGB(hex) {
+        hex = hex.replace('#','');
+        var R = parseInt(hex.substring(0,2), 16);
+        var G = parseInt(hex.substring(2,4), 16);
+        var B = parseInt(hex.substring(4,6), 16);
+        
+        return { 'r': R, 'g': G, 'b': B };
     }
 
     //TODO: Finish
