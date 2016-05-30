@@ -174,7 +174,7 @@ class ColorWheel {
         var xDiff = Math.abs(this.x - offset.x);
         var yDiff = Math.abs(this.y - offset.y);
         var dist = Math.sqrt(Math.pow(this.x - offset.x, 2) + Math.pow(this.y - offset.y, 2));
-        if (dist < this.radius - this.ringsize && xDiff < this.half && yDiff < this.half - .5) {
+        if (dist < this.radius - this.ringsize && xDiff < this.half + 1 && yDiff < this.half - .5) {
             this.inner.css({
                 left: this.can.position().left + offset.x - 2.5,
                 top: this.can.position().top + offset.y - 2.5
