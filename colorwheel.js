@@ -102,10 +102,10 @@ class ColorWheel {
         var hsv = ColorConvert.HSLToHSB(hsl.h / 60, hsl.s / 100, hsl.l / 100);
         this.setHue(hsv.h / 60);
         this.renderInner();
-        
+
         this.inner.css({
-            left: this.x - this.half + ((this.length) * (hsv.s / 100)) - 4,
-            top: this.y + this.half - ((this.length) * (hsv.b / 100))
+            left: this.x - this.half + ((this.length) * (hsv.s / 100)) - 3,
+            top: this.y + this.half - ((this.length) * (hsv.b / 100)) - (hsv.b == 0 ? 2 : 0)
         });
     }
     
@@ -131,13 +131,23 @@ class ColorWheel {
         this.ctx.fill();
     }
 
+    _clean(val) {
+        val = Math.round(val);
+        if(val % 2 != 0) {
+            val -= 1;
+        }
+        return val;
+    }
+
     renderInner() {
+        var startX = this.x - this.half - 1;
+        startX = this._clean(startX);
         for(var i = 0; i < 100; i++) {
             var line = this.ctx.createLinearGradient(
-                this.x - this.half - 3,
-                this.y - this.half + (i * (this.length / 100)) ,
-                this.x + this.half - 3,
-                this.y - this.half + (i * (this.length / 100))
+                startX,
+                this._clean(this.y - this.half + (i * (this.length / 100)) ),
+                this._clean(this.x + this.half + 2),
+                this._clean(this.y - this.half + (i * (this.length / 100))) + 2
             );
 
             var stops = 15;
@@ -151,10 +161,10 @@ class ColorWheel {
 
                 this.ctx.fillStyle = line;
                     this.ctx.fillRect(
-                        this.x - this.half - 2,
-                        (this.y - this.half) + 2 + ((i * (this.length)) / 100),
-                        this.length + 2,
-                        (this.length / 100) + 2
+                        startX,
+                        this._clean((this.y - this.half) + 2 + ((i * (this.length)) / 100)),
+                        this._clean(this.length + 2),
+                        this._clean((this.length / 100) ) + 2
                     );
         }
     }
@@ -164,7 +174,7 @@ class ColorWheel {
         var xDiff = Math.abs(this.x - offset.x);
         var yDiff = Math.abs(this.y - offset.y);
         var dist = Math.sqrt(Math.pow(this.x - offset.x, 2) + Math.pow(this.y - offset.y, 2));
-        if (dist < this.radius - this.ringsize && xDiff < this.half && yDiff < this.half) {
+        if (dist < this.radius - this.ringsize && xDiff < this.half && yDiff < this.half - .5) {
             this.inner.css({
                 left: this.can.position().left + offset.x - 2.5,
                 top: this.can.position().top + offset.y - 2.5
