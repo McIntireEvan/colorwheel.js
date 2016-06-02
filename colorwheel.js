@@ -49,9 +49,11 @@ class ColorWheel {
             if (dist < _this.radius && dist > _this.radius - _this.ringsize) {
                 _this.focusOut = true;
                 _this.updateOuter(evt);
+                onColorChange();
             } else if (dist < _this.radius - _this.ringsize) {
                 _this.focusIn = true;
                 _this.updateInner(evt);
+                onColorChange();
             }
         });
         $(document).on('mouseup', function (evt) {
