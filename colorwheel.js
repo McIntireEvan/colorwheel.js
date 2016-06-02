@@ -6,9 +6,10 @@ class ColorWheel {
      * @param {string} id - The id that will be given to the div holding all the elements
      * @param {Number} size - The diameter of the colorwheel
      */
-    constructor(id, size) {
+    constructor(id, size, onColorChange) {
         this.radius = size / 2;
         this.ringsize = size / 10;
+        this.onColorChange = onColorChange;
         this.color = 0;
 
         this.length = Math.sqrt(2 * Math.pow(this.radius - this.ringsize, 2)); //Size of the inner square
@@ -58,16 +59,18 @@ class ColorWheel {
         }).on('mousemove', function (evt) {
             if (_this.focusOut) {
                 _this.updateOuter(evt);
+                onColorChange();
             } else if (_this.focusIn) {
                 _this.updateInner(evt);
+                onColorChange();
             }
         });
         $('body').append(this.holder);
     }
 
     getRGB() {
-        var x = this.inner.offset().left - this.can.offset().left + 2.5;
-        var y = this.inner.offset().top - this.can.offset().top + 2.5;
+        var x = this.inner.offset().left - this.can.offset().left + 3;
+        var y = this.inner.offset().top - this.can.offset().top + 3;
 
         var c = this.ctx.getImageData(x, y, 1, 1).data;
         return { 'r': c[0], 'g': c[1], 'b': c[2] };
@@ -176,8 +179,8 @@ class ColorWheel {
         var dist = Math.sqrt(Math.pow(this.x - offset.x, 2) + Math.pow(this.y - offset.y, 2));
         if (dist < this.radius - this.ringsize && xDiff < this.half + 1 && yDiff < this.half - .5) {
             this.inner.css({
-                left: this.can.position().left + offset.x - 2.5,
-                top: this.can.position().top + offset.y - 2.5
+                left: this.can.position().left + offset.x - 3,
+                top: this.can.position().top + offset.y - 3
             });
         }
     }
