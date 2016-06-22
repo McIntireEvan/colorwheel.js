@@ -42,7 +42,7 @@ class ColorWheel {
         this.renderInner();
 
         var _this = this;
-        $(this.holder).on('mousedown', function (evt) {
+        $(this.holder).on('mousedown touchstart', function (evt) {
             evt.preventDefault();
             var offset = _this.getRelativePos(_this.can, evt);
             var dist = Math.sqrt(Math.pow(_this.x - offset.x, 2) + Math.pow(_this.y - offset.y, 2));
@@ -56,9 +56,9 @@ class ColorWheel {
                 onColorChange();
             }
         });
-        $(document).on('mouseup', function (evt) {
+        $(document).on('mouseup touchend', function (evt) {
             _this.focusOut = _this.focusIn = false;
-        }).on('mousemove', function (evt) {
+        }).on('mousemove touchmove', function (evt) {
             if (_this.focusOut) {
                 _this.updateOuter(evt);
                 onColorChange();
@@ -200,8 +200,19 @@ class ColorWheel {
 
     getRelativePos(element, evt) {
         var parentOffset = $(element).offset();
-        var eX = evt.pageX - parentOffset.left;
-        var eY = evt.pageY - parentOffset.top;
+        var x,y;
+        if(evt.type == "touchstart") {
+            x = evt.originalEvent.changedTouches[0].pageX;
+            y = evt.originalEvent.changedTouches[0].pageY;
+        } else if (evt.type == "touchmove") {
+            x = evt.originalEvent.touches[0].pageX;
+            y = evt.originalEvent.touches[0].pageY;
+        } else {
+            x = evt.pageX;
+            y = evt.pageY;
+        }
+        var eX = x - parentOffset.left;
+        var eY = y - parentOffset.top;
         return { x: eX, y: eY };
     }
 }
