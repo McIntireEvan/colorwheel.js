@@ -23,9 +23,20 @@ class ColorWheel {
 
         this.outer = $('<div/>').addClass('colorwheel-outer').css({
             width: this.ringsize,
-            height: this.ringsize
+            height: this.ringsize,
+            border: '2px solid black',
+            'border-radius': '100%',
+            'z-index': 5,
+            position: 'absolute'
         });
-        this.inner = $('<div/>').addClass('colorwheel-inner');
+        this.inner = $('<div/>').addClass('colorwheel-inner').css({
+            'border': '1px solid black',
+            'border-radius': '100%',
+            'width': '5px',
+            'height': '5px',
+            'z-index': 5,
+            position: 'absolute'
+        });
 
         this.holder = $('<div/>').attr('id', id).append(this.outer).append(this.inner).append(this.can);
         this.x = this.y = this.radius;
