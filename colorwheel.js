@@ -160,6 +160,36 @@ class ColorWheel {
         return val;
     }
 
+    adjustSize() {
+        var size = $(this.can).width();
+        this.radius = size / 2;
+        this.ringsize = size / 10;
+        this.length = Math.sqrt(2 * Math.pow(this.radius - this.ringsize, 2)); //Size of the inner square
+        this.half = this.length / 2;
+        this.iR = this.inner.width() / 2;
+
+        this.outer.css({
+            width: this.ringsize,
+            height: this.ringsize
+        });
+
+        this.x = this.y = this.radius;
+
+        this.setHue(this.color * (Math.PI / 180));
+        this.inner.css({
+            left: this.can.position().left + this.x - this.iR,
+            top: this.can.position().top + this.y - this.iR
+        });
+
+        this.can.attr({
+            width: size,
+            height: size
+        });
+
+        this.renderOuter();
+        this.renderInner();
+    }
+
     renderInner() {
         var startX = this._clean(this.x - this.half);
 
