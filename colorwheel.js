@@ -24,7 +24,7 @@ class ColorWheel {
         this.outer = $('<div/>').addClass('colorwheel-outer').css({
             width: this.ringsize,
             height: this.ringsize,
-            border: '2px solid black',
+            border: '3px solid black',
             'border-radius': '100%',
             'z-index': 5,
             position: 'absolute'
@@ -38,13 +38,15 @@ class ColorWheel {
             position: 'absolute'
         });
 
+        this.iR = this.inner.width() / 2;
+
         this.holder = $('<div/>').attr('id', id).append(this.outer).append(this.inner).append(this.can);
         this.x = this.y = this.radius;
 
         this.setHue(this.color * (Math.PI / 180));
         this.inner.css({
-            left: this.can.position().left + this.x - 2.5,
-            top: this.can.position().top + this.y - 2.5
+            left: this.can.position().left + this.x - this.iR,
+            top: this.can.position().top + this.y - this.iR
         });
 
         this.focusOut = false, this.focusIn = false;
@@ -55,7 +57,7 @@ class ColorWheel {
         var _this = this;
         $(this.holder).on('mousedown touchstart', function (evt) {
             evt.preventDefault();
-            var offset = _this.getRelativePos(_this.can, evt);
+            var offset = _this.normalizePos(evt);
             var dist = Math.sqrt(Math.pow(_this.x - offset.x, 2) + Math.pow(_this.y - offset.y, 2));
             if (dist < _this.radius && dist > _this.radius - _this.ringsize) {
                 _this.focusOut = true;
@@ -82,8 +84,8 @@ class ColorWheel {
     }
 
     getRGB() {
-        var x = this.inner.offset().left - this.can.offset().left + 3;
-        var y = this.inner.offset().top - this.can.offset().top + 3;
+        var x = this.inner.offset().left - this.can.offset().left + this.iR;
+        var y = this.inner.offset().top - this.can.offset().top + this.iR;
 
         var c = this.ctx.getImageData(x, y, 1, 1).data;
         return { 'r': c[0], 'g': c[1], 'b': c[2] };
@@ -108,8 +110,8 @@ class ColorWheel {
         this.color = angle * 60;
         var middle = this.radius - ((this.ringsize) / 2);
         this.outer.css({
-            left: Math.cos(angle) * middle + this.can.position().left + this.x - (this.ringsize / 2) - 2,
-            top: Math.sin(angle) * middle + this.can.position().top + this.y - (this.ringsize / 2) - 2
+            left: Math.cos(angle) * middle + this.can.position().left + this.x - (this.ringsize / 2) - 3,
+            top: Math.sin(angle) * middle + this.can.position().top + this.y - (this.ringsize / 2) - 3
         });
     }
 
@@ -120,11 +122,11 @@ class ColorWheel {
         this.renderInner();
 
         this.inner.css({
-            left: this.x - this.half + ((this.length) * (hsv.s / 100)) - 3,
-            top: this.y + this.half - ((this.length) * (hsv.b / 100)) - (hsv.b == 0 ? 2 : 0)
+            left: this.x - this.half + ((this.length) * (hsv.s / 100)) - this.iR,
+            top: this.y + this.half - ((this.length) * (hsv.b / 100)) - this.iR
         });
     }
-    
+
     setColorHex(hex) {
         var rgb = ColorConvert.HexToRGB(hex);
         this.setColor(rgb.r, rgb.g, rgb.b);
@@ -140,11 +142,14 @@ class ColorWheel {
             this.ctx.fill();
         }
         //Draw white to hide the center area
+        this.ctx.save();
         this.ctx.beginPath();
         this.ctx.fillStyle = 'white';
+        this.ctx.globalCompositeOperation = 'destination-out';
         this.ctx.moveTo(this.x, this.y);
         this.ctx.arc(this.x, this.y, this.radius - this.ringsize, 0, 2 * Math.PI, false);
         this.ctx.fill();
+        this.ctx.restore();
     }
 
     _clean(val) {
@@ -156,8 +161,8 @@ class ColorWheel {
     }
 
     renderInner() {
-        var startX = this.x - this.half - 1;
-        startX = this._clean(startX);
+        var startX = this._clean(this.x - this.half);
+
         for(var i = 0; i < 100; i++) {
             var line = this.ctx.createLinearGradient(
                 startX,
@@ -186,21 +191,22 @@ class ColorWheel {
     }
 
     updateInner(evt) {
-        var offset = this.getRelativePos(this.can, evt);
+        var offset = this.normalizePos(evt);
         var xDiff = Math.abs(this.x - offset.x);
         var yDiff = Math.abs(this.y - offset.y);
         var dist = Math.sqrt(Math.pow(this.x - offset.x, 2) + Math.pow(this.y - offset.y, 2));
-        if (dist < this.radius - this.ringsize && xDiff < this.half + 1 && yDiff < this.half - .5) {
+        if (dist < this.radius - this.ringsize && xDiff < this.half && yDiff < this.half - 1) {
             this.inner.css({
-                left: this.can.position().left + offset.x - 3,
-                top: this.can.position().top + offset.y - 3
+                left: this.can.position().left + offset.x - this.iR,
+                top: this.can.position().top + offset.y - this.iR
             });
         }
     }
 
     updateOuter(evt) {
-        var offset = this.getRelativePos(this.can, evt);
-        var rawAngle = Math.atan2(offset.y - this.y, offset.x - this.x), angle = rawAngle * 180 / Math.PI;
+        var offset = this.normalizePos(evt);
+        var rawAngle = Math.atan2(offset.y - this.y, offset.x - this.x),
+            angle = rawAngle * 180 / Math.PI;
         if (rawAngle < 0) {
             angle = 360 - (angle * -1);
         }
@@ -209,8 +215,8 @@ class ColorWheel {
         this.renderInner();
     }
 
-    getRelativePos(element, evt) {
-        var parentOffset = $(element).offset();
+    normalizePos(evt) {
+        var parentOffset = $(this.can).offset();
         var x,y;
         if(evt.type == "touchstart") {
             x = evt.originalEvent.changedTouches[0].pageX;
@@ -225,6 +231,59 @@ class ColorWheel {
         var eX = x - parentOffset.left;
         var eY = y - parentOffset.top;
         return { x: eX, y: eY };
+    }
+}
+
+/**
+ * Represents a color
+ * Formats are hex, rgb, hsl, hsv
+ */
+class Color {
+    constructor(format, a, b, c) {
+        if(format.toLowerCase() == 'hex') {
+            this.value = a;
+        }
+        if(format.toLowerCase() == 'rgb') {
+            this.value = {'r': a, 'g': b, 'b': c};
+        }
+        if(format.toLowerCase() == 'hsl') {
+            this.value = {'h': a, 's': b, 'l': c};
+        }
+        if(format.toLowerCase() == 'hsv') {
+            this.value = {'h': a, 's': b, 'v': c};
+        }
+        this.format = format.toLowerCase();
+    }
+
+    asHex() {
+        if(format == 'hex') {
+            return this.value;
+        }
+    }
+
+    asRGB() {
+        if(format == 'rgb') {
+            return this.value;
+        } else if (format == 'hex') {
+            var hex = this.value.replace('#','');
+            var r = parseInt(hex.substring(0,2), 16);
+            var g = parseInt(hex.substring(2,4), 16);
+            var b = parseInt(hex.substring(4,6), 16);
+
+            return { 'r': r, 'g': g, 'b': b };
+        }
+    }
+
+    asHSL() {
+        if(format == 'hsl') {
+            return this.value;
+        }
+    }
+
+    asHSV() {
+        if(format == 'hsv') {
+            return this.value;
+        }
     }
 }
 
@@ -311,13 +370,13 @@ class ColorConvert {
             'l': Math.round(l * 100)
         };
     }
-    
+
     static HexToRGB(hex) {
         hex = hex.replace('#','');
         var R = parseInt(hex.substring(0,2), 16);
         var G = parseInt(hex.substring(2,4), 16);
         var B = parseInt(hex.substring(4,6), 16);
-        
+
         return { 'r': R, 'g': G, 'b': B };
     }
 
