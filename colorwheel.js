@@ -213,7 +213,7 @@ class ColorWheel {
                 this.ctx.fillStyle = line;
                     this.ctx.fillRect(
                         startX,
-                        this._clean((this.y - this.half) + 2 + ((i * (this.length)) / 100)),
+                        this._clean((this.y - this.half)  + ((i * (this.length)) / 100)),
                         this._clean(this.length + 2),
                         this._clean((this.length / 100) ) + 2
                     );
@@ -222,10 +222,10 @@ class ColorWheel {
 
     updateInner(evt) {
         var offset = this.normalizePos(evt);
-        var xDiff = Math.abs(this.x - offset.x);
+        var xDiff = Math.abs(this.x - offset.x - 1);
         var yDiff = Math.abs(this.y - offset.y);
-        var dist = Math.sqrt(Math.pow(this.x - offset.x, 2) + Math.pow(this.y - offset.y, 2));
-        if (dist < this.radius - this.ringsize && xDiff < this.half && yDiff < this.half - 1) {
+        var dist = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+        if (xDiff < this.half + 1 && yDiff < this.half + 1) {
             this.inner.css({
                 left: this.can.position().left + offset.x - this.iR,
                 top: this.can.position().top + offset.y - this.iR
