@@ -197,8 +197,8 @@ class ColorWheel {
             var line = this.ctx.createLinearGradient(
                 startX,
                 this._clean(this.y - this.half + (i * (this.length / 100)) ),
-                this._clean(this.x + this.half + 2),
-                this._clean(this.y - this.half + (i * (this.length / 100))) + 2
+                this._clean(this.x + this.half),
+                this._clean(this.y - this.half + (i * (this.length / 100)))
             );
 
             var stops = 15;
@@ -210,27 +210,38 @@ class ColorWheel {
                 line.addColorStop(j / stops, 'hsl(' + hsl.h + ',' + hsl.s + '%,' + hsl.l + '%)');
             }
 
-                this.ctx.fillStyle = line;
-                    this.ctx.fillRect(
-                        startX,
-                        this._clean((this.y - this.half)  + ((i * (this.length)) / 100)),
-                        this._clean(this.length + 2),
-                        this._clean((this.length / 100) ) + 2
-                    );
+            this.ctx.fillStyle = line;
+            this.ctx.fillRect(
+                startX,
+                this._clean((this.y - this.half)  + ((i * (this.length)) / 100)),
+                this._clean(this.length + 4),
+                this._clean((this.length / 100) ) + 4
+            );
         }
     }
 
     updateInner(evt) {
         var offset = this.normalizePos(evt);
-        var xDiff = Math.abs(this.x - offset.x - 1);
-        var yDiff = Math.abs(this.y - offset.y);
-        var dist = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
-        if (xDiff < this.half + 1 && yDiff < this.half + 1) {
-            this.inner.css({
-                left: this.can.position().left + offset.x - this.iR,
-                top: this.can.position().top + offset.y - this.iR
-            });
+        var nx, ny;
+
+        if(offset.x - (this.x) > 0) {
+            nx = Math.min(offset.x, this.x + this.half);
+        } else {
+            nx = Math.max(offset.x, this.x - this.half);
         }
+
+        if(offset.y - (this.y) > 0) {
+            ny = Math.min(offset.y, this.y + this.half);
+        } else {
+            ny = Math.max(offset.y, this.y - this.half);
+        }
+        nx = this._clean(nx);
+        ny = this._clean(ny);
+
+        this.inner.css({
+            left: this.can.position().left + nx - this.iR,
+            top: this.can.position().top + ny - this.iR
+        });
     }
 
     updateOuter(evt) {
